@@ -6,19 +6,28 @@ const tokenGenerator = config.get("TOKEN_GENERATOR") || "jwt";
 const auth = (req, res, next) => {
   if (tokenGenerator === "jwt") {
     try {
-      const tokenFromClient = req.header("x-auth-token");
+      let tokenFromClient = req.header("x-auth-token");
+
       if (!tokenFromClient) {
-        throw new Error("Authentication Error: Please Login/Authenticate.");
+        return handleError(
+          res,
+          401,
+          "Authentication Error: Please Login/Authenticate."
+        );
       }
 
       const userData = verifyToken(tokenFromClient);
       if (!userData) {
-        throw new Error("Authentication Error: Unauthorized User.");
+        return handleError(
+          res,
+          401,
+          "Authentication Error: Unauthorized User."
+        );
       }
       req.user = userData;
       return next();
     } catch (error) {
-      handleError(res, 401, error.message);
+      return handleError(res, 401, error.message);
     }
   }
   return handleError(res, 500, "Use jwt!");

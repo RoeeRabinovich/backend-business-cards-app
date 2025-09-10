@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const app = express();
 const router = require("./router/router");
@@ -11,7 +12,6 @@ const {
   generateInitialCards,
   generateInitialUsers,
 } = require("./initialData/initialDataService");
-require("dotenv").config();
 
 // Middleware - Appl Level
 app.use(cors);

@@ -28,23 +28,23 @@ exports.getMyCards = async (userid) => {
     return Promise.reject(error);
   }
 };
-exports.getCard = async (cardid) => {
+exports.getCard = async (cardId) => {
   try {
-    const card = await findOne(cardid);
+    const card = await findOne(cardId);
     return Promise.resolve(card);
   } catch (error) {
     return Promise.reject(error);
   }
 };
-exports.createCard = async (rawCard) => {
+exports.createCard = async (rawCard, userId) => {
   try {
     const { error } = validateCard(rawCard);
     if (error) {
       return Promise.reject(await handleJoiError(error));
     }
-    let card = normalizeCard(rawCard);
+    let card = await normalizeCard(rawCard, userId);
     card = await create(card);
-    return Promise.resolve("success!");
+    return Promise.resolve(card);
   } catch (error) {
     return Promise.reject(error);
   }
@@ -56,8 +56,7 @@ exports.updateCard = async (cardId, rawCard) => {
     if (error) {
       return Promise.reject(await handleJoiError(error));
     }
-    let card = normalizeCard(rawCard);
-    card = await update(cardId, card);
+    const card = await update(cardId, rawCard);
     return Promise.resolve(card);
   } catch (error) {
     return Promise.reject(error);

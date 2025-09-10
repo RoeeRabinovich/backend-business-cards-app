@@ -1,6 +1,8 @@
 const Joi = require("joi");
 
 const loginValidation = (user) => {
+  const passwordRegex =
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%&^\-])[A-Za-z\d!@#$%&^\-]{9,}$/;
   const schema = Joi.object({
     email: Joi.string()
       .ruleset.regex(

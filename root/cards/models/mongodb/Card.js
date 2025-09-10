@@ -33,14 +33,14 @@ const cardSchema = new mongoose.Schema({
     required: true,
     trim: true,
   },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
   user_id: {
     type: mongoose.Schema.Types.ObjectId,
   },
   likes: [String],
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
 const Card = mongoose.model("card", cardSchema);

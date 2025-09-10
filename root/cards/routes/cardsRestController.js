@@ -12,6 +12,8 @@ const {
 const router = express.Router();
 const { auth } = require("../../auth/authService");
 
+// Routes
+// Get all cards - public
 router.get("/", async (req, res) => {
   try {
     const cards = await getCards(req.body);
@@ -21,6 +23,7 @@ router.get("/", async (req, res) => {
   }
 });
 
+// Get my cards - only for logged in users
 router.get("/my-cards", auth, async (req, res) => {
   try {
     const { _id } = req.user;
@@ -32,6 +35,7 @@ router.get("/my-cards", auth, async (req, res) => {
   }
 });
 
+// Get single card by id
 router.get("/:id", async (req, res) => {
   const { id } = req.params;
   try {
@@ -42,9 +46,10 @@ router.get("/:id", async (req, res) => {
   }
 });
 
+// Create card - only for business users
 router.post("/", auth, async (req, res) => {
   try {
-    const { isBusiness } = req.user;
+    const { isBusiness, _id } = req.user;
     if (!isBusiness) {
       return handleError(
         res,
@@ -52,13 +57,15 @@ router.post("/", auth, async (req, res) => {
         "Authorization Error: Must be business acount!"
       );
     }
-    const card = await createCard(req.body);
+
+    const card = await createCard(req.body, _id);
     return res.status(201).json(card);
   } catch (error) {
     return handleError(res, error.status || 500, error.message);
   }
 });
 
+// Update card - only by the card owner
 router.put("/:id", auth, async (req, res) => {
   try {
     const { id } = req.params;
@@ -69,6 +76,7 @@ router.put("/:id", auth, async (req, res) => {
     if (!card) {
       return handleError(res, 404, "Card not found");
     }
+
     if (String(card.user_id) !== String(_id)) {
       return handleError(
         res,
@@ -84,6 +92,7 @@ router.put("/:id", auth, async (req, res) => {
   }
 });
 
+// Like a card - only for logged in users
 router.patch("/:id", auth, async (req, res) => {
   try {
     const { id } = req.params;
@@ -103,6 +112,7 @@ router.patch("/:id", auth, async (req, res) => {
   }
 });
 
+// Delete a card - only by the card owner or an admin
 router.delete("/:id", auth, async (req, res) => {
   try {
     const { id } = req.params;
