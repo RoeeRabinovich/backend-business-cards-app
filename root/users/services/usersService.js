@@ -91,6 +91,7 @@ const deleteUser = async (userId) => {
   }
 };
 
+// Change user's business status
 const changeUserBizStatus = async (userId) => {
   try {
     const user = await changeIsBizStatus(userId);

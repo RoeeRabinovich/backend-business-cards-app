@@ -2,8 +2,11 @@ const Card = require("../models/mongodb/Card");
 const config = require("config");
 const { handleBadRequest } = require("../../utils/errorHandler");
 
+/// Database selection
 const DB = config.get("DB");
 
+// Data Access Functions
+/// Get all cards
 const find = async () => {
   if (DB === "MONGODB") {
     try {
@@ -16,6 +19,8 @@ const find = async () => {
   }
   return Promise.resolve([]);
 };
+
+// Get my cards
 const findMyCards = async (userId) => {
   if (DB === "MONGODB") {
     try {
@@ -29,6 +34,7 @@ const findMyCards = async (userId) => {
   return Promise.resolve([]);
 };
 
+// Get single card by ID
 const findOne = async (cardId) => {
   if (DB === "MONGODB") {
     try {
@@ -47,6 +53,7 @@ const findOne = async (cardId) => {
   return Promise.resolve({});
 };
 
+// Create new card
 const create = async (normalizedCard) => {
   if (DB === "MONGODB") {
     try {
@@ -61,6 +68,7 @@ const create = async (normalizedCard) => {
   return Promise.resolve("create card not in database");
 };
 
+// Update card
 const update = async (cardId, normalizedCard) => {
   if (DB === "MONGODB") {
     try {
@@ -82,7 +90,7 @@ const update = async (cardId, normalizedCard) => {
   }
   return Promise.resolve("card updated not in database");
 };
-
+// Like / Unlike card
 const like = async (cardId, userId) => {
   if (DB === "MONGODB") {
     try {
@@ -109,6 +117,42 @@ const like = async (cardId, userId) => {
   return Promise.resolve("card like not in database");
 };
 
+//BONUS
+// Change card's bizNumber
+const changeBizNumber = async (cardId, newBizNumber) => {
+  if (DB === "MONGODB") {
+    try {
+      const existing = await Card.findOne({ bizNumber: newBizNumber });
+      if (existing && String(existing._id) !== String(cardId)) {
+        const error = new Error(
+          "This bizNumber is already taken by another card."
+        );
+        error.status = 409;
+        throw error;
+      }
+      // Update the card's bizNumber
+      const card = await Card.findByIdAndUpdate(
+        cardId,
+        { bizNumber: newBizNumber },
+        { new: true }
+      ).select("-password -__v");
+      if (!card) {
+        const error = new Error(
+          "Could not update bizNumber because a card with this ID cannot be found in the database."
+        );
+        error.status = 404;
+        throw error;
+      }
+      return Promise.resolve(card);
+    } catch (error) {
+      error.status = error.status || 400;
+      return handleBadRequest("Mongoose", error);
+    }
+  }
+  return Promise.resolve("changeBizNumber not in mongodb");
+};
+
+// Delete card
 const remove = async (cardId) => {
   if (DB === "MONGODB") {
     try {
@@ -129,4 +173,13 @@ const remove = async (cardId) => {
   return Promise.resolve("card deleted not in database");
 };
 
-module.exports = { find, findMyCards, findOne, create, update, like, remove };
+module.exports = {
+  find,
+  findMyCards,
+  findOne,
+  create,
+  update,
+  like,
+  changeBizNumber,
+  remove,
+};

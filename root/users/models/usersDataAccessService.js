@@ -129,6 +129,7 @@ exports.changeIsBizStatus = async (userId) => {
   }
   return Promise.resolve("User Updated not in mongodb!");
 };
+
 // Delete user
 exports.removeUser = async (userId) => {
   if (DB === "MONGODB") {

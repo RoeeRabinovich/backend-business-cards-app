@@ -8,6 +8,7 @@ const {
   updateCard,
   likeCard,
   deleteCard,
+  changeBizNumber,
 } = require("../services/cardService");
 const router = express.Router();
 const { auth } = require("../../auth/authService");
@@ -106,6 +107,27 @@ router.patch("/:id", auth, async (req, res) => {
     if (!card) {
       return handleError(res, 404, "Card not found");
     }
+    return res.status(200).json(card);
+  } catch (error) {
+    return handleError(res, error.status || 500, error.message);
+  }
+});
+
+//BONUS
+// Change bizNumber - only by the card owner or an admin
+router.patch("/:id/biz-number", auth, async (req, res) => {
+  try {
+    const id = req.params.id;
+    const bizNumber = req.body.bizNumber;
+    const { _id, isAdmin } = req.user;
+    if (_id !== id && !isAdmin) {
+      return handleError(
+        res,
+        403,
+        "Authorization Error: Must be admin or THE registered user!"
+      );
+    }
+    const card = await changeBizNumber(id, bizNumber);
     return res.status(200).json(card);
   } catch (error) {
     return handleError(res, error.status || 500, error.message);
