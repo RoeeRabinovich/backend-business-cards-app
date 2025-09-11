@@ -34,7 +34,7 @@
       "isAdmin": true,
       "phone": "050-0000000",
       "email": "admin@gmail.com",
-      "password": "Aa1234!",
+      "password": "Aa1234!123",
       "address": {
         "country": "israel",
         "city": "tel-aviv",

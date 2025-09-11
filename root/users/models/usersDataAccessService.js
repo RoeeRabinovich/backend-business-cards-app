@@ -87,8 +87,7 @@ exports.update = async (userId, normalizedUser) => {
     try {
       const user = await User.findByIdAndUpdate(userId, normalizedUser, {
         new: true,
-      });
-      user.select("-password -__v");
+      }).select("-password -__v");
       if (!user) {
         const error = new Error(
           "Could not update this user because a user with this ID cannot be found in the database."
@@ -108,17 +107,21 @@ exports.update = async (userId, normalizedUser) => {
 exports.changeIsBizStatus = async (userId) => {
   if (DB === "MONGODB") {
     try {
-      const pipline = [{ $set: { isBusiness: { $not: "$isbusiness" } } }];
-      const user = await User.findByIdAndUpdate(userId, pipline, { new: true });
-      user.select("-password");
+      const user = await User.findById(userId);
       if (!user) {
         const error = new Error(
-          "Could not change use isBusiness status because a user with this ID cannot be found in the database."
+          "Could not change user isBusiness status because a user with this ID cannot be found in the database."
         );
         error.status = 404;
         throw error;
       }
-      return Promise.resolve(user);
+      user.isBusiness = !user.isBusiness;
+      await user.save();
+      // Remove sensitive fields before returning
+      const userObj = user.toObject();
+      delete userObj.password;
+      delete userObj.__v;
+      return Promise.resolve(userObj);
     } catch (error) {
       error.status = error.status || 404;
       return handleBadRequest("Mongoose", error);
